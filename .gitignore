@@ -1,0 +1,26 @@
+# Bağımlılıklar ve build
+node_modules
+.next
+dist
+out
+
+# Ortam ve gizlilik
+.env
+.env.local
+.env.*.local
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# SSL (sunucuda elle koyulur)
+certs/*.pem
+certs/*.key
+!certs/.gitkeep

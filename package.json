@@ -1,0 +1,27 @@
+{
+  "name": "picsellio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Picsellio - Frontend, Backend, Database, AI, Admin",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:admin": "npm run dev --workspace=admin",
+    "dev:ai": "npm run dev --workspace=ai",
+    "build": "npm run build --workspaces",
+    "db:generate": "npm run db:generate --workspace=database",
+    "db:migrate": "npm run db:migrate --workspace=database",
+    "db:studio": "npm run db:studio --workspace=database"
+  },
+  "workspaces": [
+    "frontend",
+    "backend",
+    "database",
+    "ai",
+    "admin"
+  ],
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
