@@ -1,0 +1,225 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String          @id @default(cuid())
+  email           String          @unique
+  passwordHash    String?         // null for legacy users; required for login
+  name            String?         // person name (Usta) or display name
+  role            String          @default("USER") // USER | ADMIN
+  banned          Boolean         @default(false)
+  stripeId        String?         @unique
+  // Registration type and profile (Esnaf / Usta)
+  userType        String?         // ESNAF | USTA
+  businessName    String?         // Esnaf: isletme adi
+  profession      String?         // Usta: meslek
+  phone           String?
+  city            String?
+  district        String?
+  category        String?
+  address         String?
+  images          Image[]
+  products        Product[]
+  payments        Payment[]
+  orders          Order[]
+  reviews         Review[]
+  serviceReviews  ServiceReview[]
+  listingCredits  ListingCredit[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model Plan {
+  id         String   @id @default(cuid())
+  name       String   // e.g. "10 Günlük İlan"
+  slug       String   @unique // 10_DAY | 30_DAY
+  days       Int      // 10 or 30
+  priceCents Int      // 10000 = 100 TL, 25000 = 250 TL
+  payments   Payment[]
+  listingCredits ListingCredit[]
+}
+
+model ListingCredit {
+  id               String          @id @default(cuid())
+  userId           String
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId           String
+  plan             Plan            @relation(fields: [planId], references: [id])
+  used             Boolean         @default(false)
+  usedAt           DateTime?
+  productId        String?         @unique
+  product          Product?        @relation(fields: [productId], references: [id])
+  serviceListingId String?         @unique
+  serviceListing   ServiceListing? @relation(fields: [serviceListingId], references: [id])
+  createdAt        DateTime        @default(now())
+  @@index([userId])
+  @@index([used])
+}
+
+model Product {
+  id                  String    @id @default(cuid())
+  title               String
+  description         String?
+  price               Int       // cents or TL (spec says "price")
+  imageUrl            String
+  sellerPhone         String?   // WhatsApp contact
+  city                String?
+  district            String?
+  category            String?
+  categorySlug        String?
+  seoTags             String?   // AI-generated SEO tags (comma-separated)
+  userId              String
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status              String    @default("DRAFT") // DRAFT | PENDING | APPROVED | REJECTED
+  aiVerified          Boolean   @default(false)
+  aiVerificationStatus String?  // VERIFIED | SUSPICIOUS | REJECTED
+  listingExpiresAt    DateTime? // from plan (10 or 30 days)
+  listingCredit       ListingCredit?
+  payments            Payment[]
+  orderItems          OrderItem[]
+  reviews             Review[]
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([status])
+  @@index([userId])
+  @@index([listingExpiresAt])
+  @@index([city])
+  @@index([district])
+  @@index([categorySlug])
+}
+
+model Order {
+  id         String      @id @default(cuid())
+  userId     String
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status     String      @default("PENDING") // PENDING | PAID | SHIPPED | DELIVERED | CANCELLED
+  totalCents Int         // total in cents
+  stripeId   String?     @unique
+  items      OrderItem[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  quantity  Int      @default(1)
+  unitCents Int      // price per unit at time of order (cents)
+  createdAt DateTime @default(now())
+
+  @@unique([orderId, productId])
+  @@index([orderId])
+  @@index([productId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  rating    Int      // 1-5
+  body      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId])
+  @@index([productId])
+  @@index([userId])
+}
+
+model Image {
+  id            String        @id @default(cuid())
+  url           String
+  label         String?
+  userId        String?
+  user          User?         @relation(fields: [userId], references: [id])
+  verification  Verification?
+  createdAt     DateTime      @default(now())
+}
+
+model Verification {
+  id        String   @id @default(cuid())
+  imageId   String   @unique
+  image     Image    @relation(fields: [imageId], references: [id], onDelete: Cascade)
+  status    String   // pending | approved | rejected
+  aiResult  String?  // JSON veya özet
+  createdAt DateTime @default(now())
+}
+
+model PendingShopierOrder {
+  id        String   @id @default(cuid())
+  orderId   String   @unique
+  userId    String
+  planId    String
+  productId String?  // when set: payment is to publish this listing; callback will set listing active
+  createdAt DateTime @default(now())
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  productId     String?
+  product       Product? @relation(fields: [productId], references: [id])
+  planId        String?
+  plan          Plan?    @relation(fields: [planId], references: [id])
+  stripeId      String?  @unique
+  shopierId     String?  @unique
+  amount        Int      // cents (TL * 100)
+  status        String   // succeeded | pending | failed
+  createdAt     DateTime @default(now())
+}
+
+model ServiceListing {
+  id                String          @id @default(cuid())
+  name              String
+  category          String
+  phone             String
+  whatsapp          String
+  city              String
+  district          String
+  address           String?
+  description       String?
+  image             String
+  status            String          @default("PENDING") // PENDING | APPROVED | REJECTED
+  userId            String?
+  listingExpiresAt  DateTime?       // from plan (10 or 30 days)
+  listingCredit     ListingCredit?
+  serviceReviews    ServiceReview[]
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@index([city])
+  @@index([district])
+  @@index([category])
+  @@index([status])
+}
+
+model ServiceReview {
+  id          String         @id @default(cuid())
+  serviceId   String
+  service     ServiceListing @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating      Int            // 1-5 stars
+  comment     String?
+  createdAt   DateTime       @default(now())
+
+  @@unique([userId, serviceId])
+  @@index([serviceId])
+  @@index([userId])
+}
