@@ -1,18 +1,18 @@
-# Picsellio – Fastify backend (Node + Prisma)
+# Picsellio – Next.js frontend
 FROM node:20-alpine AS base
 
-# Build stage: Prisma schema database/ içinde olduğu için context proje kökü olacak
+# Build stage
 FROM base AS builder
 WORKDIR /app
 
-# Önce database (Prisma schema) ve backend kopyala
-COPY database ./database
-COPY backend/package.json backend/package-lock.json* ./backend/
-WORKDIR /app/backend
+COPY package.json package-lock.json* ./
 RUN npm ci 2>/dev/null || npm install
 
-COPY backend .
-RUN npx prisma generate --schema=../database/prisma/schema.prisma
+COPY . .
+# Build-time: tarayıcı API istekleri bu adrese gidecek (production'da sunucu adresinizi verin)
+ARG NEXT_PUBLIC_API_URL=http://localhost:4000
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
 RUN npm run build
 
 # Production stage
@@ -20,20 +20,18 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 fastify
+RUN adduser --system --uid 1001 nextjs
 
-COPY --from=builder /app/database ./database
-COPY --from=builder /app/backend/dist ./dist
-COPY --from=builder /app/backend/node_modules ./node_modules
-COPY --from=builder /app/backend/package.json ./
-# Statik dosyalar için boş public (runtime'da mount veya volume ile doldurulabilir)
-RUN mkdir -p public/uploads && chown -R fastify:nodejs public
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-USER fastify
-EXPOSE 4000
-ENV PORT=4000
+USER nextjs
+EXPOSE 3000
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
-# İlk açılışta migration (schema database/ içinde)
-CMD ["sh", "-c", "npx prisma migrate deploy --schema=./database/prisma/schema.prisma 2>/dev/null; node dist/index.js"]
+CMD ["node", "server.js"]
