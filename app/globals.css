@@ -1,0 +1,140 @@
+@import "tailwindcss";
+
+:root {
+  --bg-dark-blue: #0f172a;
+  --bg-dark-blue-deep: #0c1222;
+  --bg-hero: #0f172a;
+  --foreground: #f8fafc;
+  --muted: #94a3b8;
+  --accent-green: #22c55e;
+  --accent-green-hover: #16a34a;
+  --accent-green-light: #86efac;
+  /* Modern SaaS neon accent */
+  --neon-green: #00ff9c;
+  --neon-green-glow: rgba(0, 255, 156, 0.5);
+  --glass: rgba(15, 23, 42, 0.7);
+  --glass-border: rgba(148, 163, 184, 0.15);
+  --card: #1e293b;
+  --border: #334155;
+  /* SaaS glass & shadows */
+  --glass-light: rgba(255, 255, 255, 0.72);
+  --glass-border-light: rgba(0, 0, 0, 0.06);
+  --shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+}
+
+@theme inline {
+  --color-background: var(--bg-dark-blue);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Global background – applied only to body; do not place inside sections */
+body {
+  background-image: url('/background/picsellio-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  min-height: 100%;
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 20px var(--neon-green-glow); }
+  50% { opacity: 0.95; box-shadow: 0 0 40px var(--neon-green-glow), 0 0 60px rgba(0, 255, 156, 0.3); }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+/* Animated gradient for hero title */
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 6s ease infinite;
+}
+
+.hero-title-gradient {
+  background: linear-gradient(90deg, #3b82f6, #a855f7, #22d3ee, #3b82f6);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 24px rgba(59, 130, 246, 0.4)) drop-shadow(0 0 48px rgba(168, 85, 247, 0.25));
+}
+
+/* SaaS glass card (light sections) */
+.glass-card {
+  background: var(--glass-light);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border-light);
+  box-shadow: var(--shadow-card);
+}
+.glass-card:hover {
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* Tom Select: searchable dropdown (city/district) */
+.ts-wrapper .ts-control {
+  padding-left: 0.25rem;
+}
+.ts-wrapper .ts-control .item {
+  max-width: 100%;
+}
+.ts-dropdown {
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+  margin-top: 0.25rem;
+}
+.ts-dropdown .option {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+}
+.ts-dropdown .no-results {
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+.ts-wrapper.single .ts-control input {
+  cursor: text;
+}
+.ts-wrapper.single .ts-control:not(.disabled):after {
+  border-width: 5px 4px 0;
+  border-color: currentColor transparent transparent;
+  margin-top: -2px;
+}
+
+/* Content panels: semi-transparent dark backgrounds so body background image shows through */
+.parallax-content-bg {
+  background-color: rgba(15, 23, 42, 0.55);
+}
+.parallax-section-bg {
+  background-color: rgba(15, 23, 42, 0.5);
+}
+.parallax-card-bg {
+  background-color: rgba(30, 41, 59, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.card-bg {
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}

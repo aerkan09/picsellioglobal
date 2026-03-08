@@ -1,0 +1,18 @@
+[
+  {"name": "Tostçu", "slug": "tostcu"},
+  {"name": "Giyim Mağazası", "slug": "giyim-magazasi"},
+  {"name": "Oto Galeri", "slug": "oto-galeri"},
+  {"name": "Klima Satıcısı", "slug": "klima-saticisi"},
+  {"name": "Telefon Mağazası", "slug": "telefon-magazasi"},
+  {"name": "Mobilya Mağazası", "slug": "mobilya-magazasi"},
+  {"name": "Cam Balkon Satıcısı", "slug": "cam-balkon-saticisi"},
+  {"name": "Beyaz Eşya Mağazası", "slug": "beyaz-esya-magazasi"},
+  {"name": "Elektronik Mağaza", "slug": "elektronik-magaza"},
+  {"name": "Kitap ve Kırtasiye", "slug": "kitap-kirtasiye"},
+  {"name": "Spor Malzemesi", "slug": "spor-malzemesi"},
+  {"name": "Ayakkabı ve Çanta", "slug": "ayakkabi-canta"},
+  {"name": "Takı ve Aksesuar", "slug": "taki-aksesuar"},
+  {"name": "Züccaciye ve Ev Tekstili", "slug": "zuccaciye-ev-tekstili"},
+  {"name": "Bahçe ve Yapı Market", "slug": "bahce-yapi-market"},
+  {"name": "Diğer Esnaf", "slug": "diger-esnaf"}
+]
